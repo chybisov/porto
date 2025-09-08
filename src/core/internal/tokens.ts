@@ -65,7 +65,8 @@ export namespace getToken {
   export function predicate(addressOrSymbol: Token.Symbol | Address.Address) {
     return (token: Token.Token) => {
       if (!addressOrSymbol) return false
-      if (Address.validate(addressOrSymbol))
+      // Be lenient on checksum when detecting an address – compare case-insensitively.
+      if (Address.validate(addressOrSymbol, { strict: false }))
         return Address.isEqual(token.address, addressOrSymbol)
       if (addressOrSymbol === 'native') return token.address === zeroAddress
       return addressOrSymbol === token.symbol
@@ -98,7 +99,8 @@ export async function resolveFeeTokens<chain extends Chains.Chain | undefined>(
   const index = feeTokens?.findIndex((feeToken) => {
     if (overrideFeeToken) {
       if (overrideFeeToken === 'native') return feeToken.address === zeroAddress
-      if (Address.validate(overrideFeeToken))
+      // Be lenient on checksum when detecting an address – compare case-insensitively.
+      if (Address.validate(overrideFeeToken, { strict: false }))
         return Address.isEqual(feeToken.address, overrideFeeToken)
       return overrideFeeToken === feeToken.symbol
     }

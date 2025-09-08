@@ -150,6 +150,28 @@ describe.runIf(!Anvil.enabled)('getToken', () => {
       }
     `)
   })
+
+  test('param: addressOrSymbol (as checksummed address)', async () => {
+    const porto = TestConfig.getPorto()
+    const client = TestConfig.getRelayClient(porto)
+
+    // EXP in checksummed form (same as lowercased in capabilities)
+    const token = await Tokens.getToken(client, {
+      addressOrSymbol: '0x2d49a0e75c86779C391418214eC7e1B18E58Bb34',
+    })
+
+    expect({ ...token, nativeRate: null }).toMatchInlineSnapshot(`
+      {
+        "address": "0x2d49a0e75c86779c391418214ec7e1b18e58bb34",
+        "decimals": 18,
+        "feeToken": true,
+        "interop": true,
+        "nativeRate": null,
+        "symbol": "EXP",
+        "uid": "exp1",
+      }
+    `)
+  })
 })
 
 describe.runIf(!Anvil.enabled)('resolveFeeTokens', () => {
@@ -368,6 +390,22 @@ describe.runIf(!Anvil.enabled)('resolveFeeTokens', () => {
         },
       ]
     `)
+  })
+
+  test('param: feeToken (as checksummed address)', async () => {
+    const porto = TestConfig.getPorto()
+    const client = TestConfig.getRelayClient(porto)
+
+    const feeTokens = await Tokens.resolveFeeTokens(client, {
+      // EXP in checksummed form
+      addressOrSymbol: '0x2d49a0e75c86779C391418214eC7e1B18E58Bb34',
+      store: porto._internal.store,
+    })
+
+    expect(feeTokens[0].symbol).toBe('EXP')
+    expect(feeTokens[0].address).toBe(
+      '0x2d49a0e75c86779c391418214ec7e1b18e58bb34',
+    )
   })
 
   test('behavior: default fee token', async () => {
